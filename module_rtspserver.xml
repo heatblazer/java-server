@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_rtspserver" default="compile.module.rtspserver">
+  <dirname property="module.rtspserver.basedir" file="${ant.file.module_rtspserver}"/>
+  
+  <property name="module.jdk.home.rtspserver" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.rtspserver" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.rtspserver" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.rtspserver" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="rtspserver.output.dir" value="${module.rtspserver.basedir}/out/production/RtspServer"/>
+  <property name="rtspserver.testoutput.dir" value="${module.rtspserver.basedir}/out/test/RtspServer"/>
+  
+  <path id="rtspserver.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="rtspserver.module.production.classpath">
+    <path refid="${module.jdk.classpath.rtspserver}"/>
+  </path>
+  
+  <path id="rtspserver.runtime.production.module.classpath">
+    <pathelement location="${rtspserver.output.dir}"/>
+  </path>
+  
+  <path id="rtspserver.module.classpath">
+    <path refid="${module.jdk.classpath.rtspserver}"/>
+    <pathelement location="${rtspserver.output.dir}"/>
+  </path>
+  
+  <path id="rtspserver.runtime.module.classpath">
+    <pathelement location="${rtspserver.testoutput.dir}"/>
+    <pathelement location="${rtspserver.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.rtspserver">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.rtspserver">
+    <patternset refid="excluded.from.module.rtspserver"/>
+  </patternset>
+  
+  <path id="rtspserver.module.sourcepath">
+    <dirset dir="${module.rtspserver.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.rtspserver" depends="compile.module.rtspserver.production,compile.module.rtspserver.tests" description="Compile module RtspServer"/>
+  
+  <target name="compile.module.rtspserver.production" depends="register.custom.compilers" description="Compile module RtspServer; production classes">
+    <mkdir dir="${rtspserver.output.dir}"/>
+    <javac2 destdir="${rtspserver.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.rtspserver}/javac">
+      <compilerarg line="${compiler.args.rtspserver}"/>
+      <bootclasspath refid="rtspserver.module.bootclasspath"/>
+      <classpath refid="rtspserver.module.production.classpath"/>
+      <src refid="rtspserver.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.rtspserver"/>
+    </javac2>
+    
+    <copy todir="${rtspserver.output.dir}">
+      <fileset dir="${module.rtspserver.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.rtspserver.tests" depends="register.custom.compilers,compile.module.rtspserver.production" description="compile module RtspServer; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.rtspserver" description="cleanup module">
+    <delete dir="${rtspserver.output.dir}"/>
+    <delete dir="${rtspserver.testoutput.dir}"/>
+  </target>
+</project>
