@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import  com.ilian.rtspserver.UDP; /* udp for RTP */
 import com.intellij.ide.ui.AppearanceOptionsTopHitProvider;
 
-public class RtspServer extends Thread{
+public class RtspServer extends Thread {
 
     public static final int MAX_USERS = 64;
 	private static int clientsIds = 0;
@@ -19,18 +19,32 @@ public class RtspServer extends Thread{
 		public int ID;
         public boolean isRunning = true;
 		private Socket caller_sock = null;
-		public ClientProc(Socket ref)
+        private Object m_user_data;
+
+		public ClientProc(Socket ref, Object user_data)
 		{
 			ID = clientsIds++; /* assign an unique id */
-			caller_sock = ref; /* aggregation */ 
+			caller_sock = ref; /* aggregation */
+			m_user_data = user_data; /* attach user data */
 		}
 		
 		@Override
 		public void run()
 		{
 			while(isRunning) {
+                /* do something with user data */
+                synchronized (this){
+                    // user data goes here if needed synchro
+                    if (m_user_data != null) {
+
+                    }
+                }
                 try {
-                    if (_writeMessage("Client thread [" + ID + "]") == 0) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Client thread ID: [");
+                    sb.append(ID);
+                    sb.append("] running\n");
+                    if (_writeMessage(sb.toString()) == 0) {
                         try {
                             Thread.currentThread().sleep(100);
                         } catch (Exception ex) {/*eat it*/}
@@ -47,16 +61,20 @@ public class RtspServer extends Thread{
 
 		private int _writeMessage(String msg) throws Exception {
 
+            DataOutputStream dataOUT = null;
             if (!caller_sock.isConnected()) {
                 isRunning = false;
                 return -1;
             }
             try {
                 /* write the head to socket */
-                DataOutputStream dataOUT =
-                        new DataOutputStream(caller_sock.getOutputStream());
+                dataOUT =  new DataOutputStream(caller_sock.getOutputStream());
                 dataOUT.writeUTF(msg);
+                dataOUT.flush();
+
             } catch (Exception ex) {
+                dataOUT.flush();
+                dataOUT.close();
                 ex.printStackTrace();
                 isRunning = false;
                 throw new Exception("Connection lost!");
@@ -95,7 +113,8 @@ public class RtspServer extends Thread{
                 if (server.isConnected()) {
                     System.out.println("Just connected to " +
                             server.getRemoteSocketAddress());
-                    ClientProc cli = new ClientProc(server);
+                    /* pass user data - may be a UDP packet or whatever it may be */
+                    ClientProc cli = new ClientProc(server, null);
                     g_clients.add(cli);
                     cli.start();
                 }

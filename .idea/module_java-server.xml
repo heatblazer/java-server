@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_java-server" default="compile.module.java-server">
+  <dirname property="module.java-server.basedir" file="${ant.file.module_java-server}"/>
+  
+  <property name="module.jdk.home.java-server" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.java-server" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.java-server" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.java-server" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="java-server.output.dir" value="undefined"/>
+  <property name="java-server.testoutput.dir" value="undefined"/>
+  
+  <path id="java-server.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="java-server.module.production.classpath">
+    <path refid="${module.jdk.classpath.java-server}"/>
+  </path>
+  
+  <path id="java-server.runtime.production.module.classpath"/>
+  
+  <path id="java-server.module.classpath">
+    <path refid="${module.jdk.classpath.java-server}"/>
+  </path>
+  
+  <path id="java-server.runtime.module.classpath"/>
+  
+  
+  <patternset id="excluded.from.module.java-server">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.java-server">
+    <patternset refid="excluded.from.module.java-server"/>
+  </patternset>
+  
+  
+  <target name="compile.module.java-server" depends="compile.module.java-server.production,compile.module.java-server.tests" description="Compile module java-server"/>
+  
+  <target name="compile.module.java-server.production" depends="register.custom.compilers" description="Compile module java-server; production classes"/>
+  
+  <target name="compile.module.java-server.tests" depends="register.custom.compilers,compile.module.java-server.production" description="compile module java-server; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.java-server" description="cleanup module">
+    <delete dir="${java-server.output.dir}"/>
+    <delete dir="${java-server.testoutput.dir}"/>
+  </target>
+</project>
