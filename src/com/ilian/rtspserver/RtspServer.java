@@ -5,9 +5,11 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
-
+/* customs */
 import  com.ilian.rtspserver.UDP; /* udp for RTP */
 import com.intellij.ide.ui.AppearanceOptionsTopHitProvider;
+import com.ilian.rtspserver.RTSP;
+import com.ilian.html.HTML;
 
 public class RtspServer extends Thread {
 
@@ -16,48 +18,48 @@ public class RtspServer extends Thread {
 	
 	/* custom class for handling clients */
 	protected  class ClientProc extends Thread {
-		public int ID;
-        public boolean isRunning = true;
-		private Socket caller_sock = null;
-        private Object m_user_data;
+		protected int ID;
+        protected boolean isRunning = true;
+		protected Socket caller_sock = null;
+        protected Object m_user_data;
 
-		public ClientProc(Socket ref, Object user_data)
+		protected ClientProc(Socket ref, Object user_data)
 		{
 			ID = clientsIds++; /* assign an unique id */
 			caller_sock = ref; /* aggregation */
 			m_user_data = user_data; /* attach user data */
 		}
-		
+
 		@Override
 		public void run()
 		{
+            HTML html = new HTML();
 			while(isRunning) {
                 /* do something with user data */
-                synchronized (this){
-                    // user data goes here if needed synchro
-                    if (m_user_data != null) {
 
-                    }
-                }
-                try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Client thread ID: [");
-                    sb.append(ID);
-                    sb.append("] running\n");
-                    if (_writeMessage(sb.toString()) == 0) {
-                        try {
-                            Thread.currentThread().sleep(100);
-                        } catch (Exception ex) {/*eat it*/}
-                    } else {
-                        isRunning = false;
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    isRunning = false;
-                    return ;
-                }
+                /* just print message */
+                print_message("some message... ");
 			}
 		}
+
+        private void print_message(String s)
+        {
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(s);
+                if (_writeMessage(sb.toString()) == 0) {
+                    try {
+                        Thread.currentThread().sleep(100);
+                    } catch (Exception ex) {/*eat it*/}
+                } else {
+                    isRunning = false;
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                isRunning = false;
+                return ;
+            }
+        }
 
 		private int _writeMessage(String msg) throws Exception {
 
@@ -91,7 +93,13 @@ public class RtspServer extends Thread {
 	private ServerSocket m_serv_sock = null;
 	private  UDP    m_transport;
 
-	
+	private void sleepCurrentThread(int mills) {
+        try {
+            Thread.currentThread().sleep(mills);
+        } catch (Exception ex) {
+        }
+    }
+
 	public RtspServer(int port) throws IOException
 	{
 		m_serv_sock = new ServerSocket(port);
@@ -125,6 +133,7 @@ public class RtspServer extends Thread {
                         g_clients.remove(i);
                     }
                 }
+                sleepCurrentThread(100); /* give a bit of time to breathe, so other threads are working good */
 
             } catch (SocketTimeoutException ex) {
                 System.out.println("Socket timed out...");
@@ -140,7 +149,7 @@ public class RtspServer extends Thread {
                 isOpen = false;
                 break;
             } finally {
-                /* nothing */
+                /* do some finalizing here if needed */
             }
         }
 
