@@ -70,8 +70,10 @@ public class RtspServer extends Thread {
             }
             try {
                 /* write the head to socket */
+                byte[] bytes = new byte[msg.length()];
+                bytes = msg.getBytes();
                 dataOUT =  new DataOutputStream(caller_sock.getOutputStream());
-                dataOUT.writeUTF(msg);
+                dataOUT.write(bytes);
                 dataOUT.flush();
 
             } catch (Exception ex) {
