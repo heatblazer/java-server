@@ -39,6 +39,8 @@ public class RtspServer extends Thread {
 
                 /* just print message */
                 print_message("some message... ");
+                /* give a little breathe time */
+                try { Thread.currentThread().sleep(100); } catch (Exception ex) { /*eat it*/ }
 			}
 		}
 
